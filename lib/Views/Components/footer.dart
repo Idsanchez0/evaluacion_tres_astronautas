@@ -5,6 +5,7 @@ import 'package:evaluacion_tres_astronautas/Views/Extra/calendario.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FooterGeneral extends StatefulWidget{
   var screen;
@@ -13,10 +14,19 @@ class FooterGeneral extends StatefulWidget{
 }
 class _FooterGeneral extends State<FooterGeneral>{
   var _screen;
+  var _lan;
+
+  getData() async {
+    SharedPreferences lanpref = await SharedPreferences.getInstance();
+    setState(() {
+      _lan = lanpref.getString('idioma');
+    });
+    Remplazo(widget.screen);
+  }
   @override
   void initState() {
     super.initState();
-    Remplazo(widget.screen);
+    getData();
   }
 
   Remplazo(var screen){
@@ -142,7 +152,7 @@ class _FooterGeneral extends State<FooterGeneral>{
                                     borderRadius: BorderRadius.all(Radius.circular(50*SizeConfig.widthMultiplier))
                                 ),
                                 child: Center(
-                                  child: Text("Accept",
+                                  child: Text(_lan=='es'?"Aceptar":"Accept",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: "Poppins",
@@ -222,7 +232,7 @@ class _FooterGeneral extends State<FooterGeneral>{
                         padding: EdgeInsets.only(top: 1.5*SizeConfig.heightMultiplier),
                         child: InkWell(
                             onTap: (){
-                              ErrorPopUp('Disabled function');
+                              ErrorPopUp(_lan=='es'?"Función no disponible":'Disabled function');
                             },
                           child: Image(
                             image: _screen=='ejercici42'?AssetImage('images/icons/zoom2.png'):AssetImage('images/icons/zoom.png'),
@@ -249,7 +259,7 @@ class _FooterGeneral extends State<FooterGeneral>{
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(left: 3*SizeConfig.widthMultiplier),
-                                  child: Text('Favoritos',
+                                  child: Text(_lan=='es'?"Favoritos":'Favorites',
                                     style: TextStyle(
                                         color: _screen=='ejercicio2'?HexColor('e0844c'):Colors.black,
                                         fontSize: 1.9*SizeConfig.textMultiplier,

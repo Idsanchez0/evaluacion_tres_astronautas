@@ -5,6 +5,7 @@ import 'package:evaluacion_tres_astronautas/SizeConfig/SizeConfig.dart';
 import 'package:evaluacion_tres_astronautas/Views/Components/footer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:async';
@@ -23,15 +24,72 @@ class _Calendario extends State<Calendario>{
   late CalendarController _controller;
   String _curretDate='';
   bool shouldPop = true;
+  var _lan;
 
+  getData() async {
+    SharedPreferences lanpref = await SharedPreferences.getInstance();
+    setState(() {
+      _lan = lanpref.getString('idioma');
+      footerG=FooterGeneral(screen: 'calendario');
+    });
+  }
   @override
   void initState() {
     super.initState();
+    getData();
     DateTime hoy = new DateTime.now();
     DateTime fecha = new DateTime(hoy.year, hoy.month, hoy.day);
     _curretDate = fecha.toString().split(new RegExp(r"T00:00:00")).toString().substring(1,11);
     _controller = CalendarController();
-    footerG=FooterGeneral(screen: 'calendario');
+  }
+
+  ActionsSheet(BuildContext context){
+    showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context){
+          return CupertinoActionSheet(
+            title: Text(_lan.toString()=='es'?'Idioma':'Language'),
+            actions:<CupertinoActionSheetAction> [
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: ()async{
+                  SharedPreferences idiomapref= await SharedPreferences.getInstance();
+                  idiomapref.setString('idioma', 'en');
+                  setState(() {
+                    Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: Calendario()));
+                  });
+                },
+                child: Container(
+                  child: Text(_lan.toString()=='es'?'Inglés':'English'),
+                ),
+
+              ),
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: ()async{
+                  SharedPreferences idiomapref= await SharedPreferences.getInstance();
+                  idiomapref.setString('idioma', 'es');
+                  setState(() {
+                    Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: Calendario()));
+                  });
+                },
+                child: Container(
+                  child: Text(_lan.toString()=='es'?'Español':'Spanish'),
+                ),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                child: Text(_lan.toString()=='es'?'Cancelar':'Cancel'),
+              ),
+            ),
+          );
+        }
+    );
   }
 
   //
@@ -113,7 +171,7 @@ class _Calendario extends State<Calendario>{
                                     borderRadius: BorderRadius.all(Radius.circular(50*SizeConfig.widthMultiplier))
                                 ),
                                 child: Center(
-                                  child: Text("Accept",
+                                  child: Text(_lan=='es'?"Aceptar":"Accept",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: "Poppins",
@@ -171,7 +229,7 @@ class _Calendario extends State<Calendario>{
                                     margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
                                     child: InkWell(
                                       onTap: (){
-                                        ErrorPopUp('Notifications are not enabled');
+                                        ErrorPopUp(_lan=='es'?"Las notificaciones no están activadas":'Notifications are not enabled');
                                       },
                                       child: Container(
                                           padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
@@ -191,7 +249,7 @@ class _Calendario extends State<Calendario>{
                                     margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
                                     child: InkWell(
                                       onTap: (){
-                                        ErrorPopUp('The settings are not available');
+                                        ActionsSheet(context);
                                       },
                                       child: Container(
                                         padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
@@ -226,7 +284,7 @@ class _Calendario extends State<Calendario>{
         child: Container(
             child: Container(
               margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-              child: Text("Calendar",
+              child: Text(_lan=='es'?"Calendario":"Calendar",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.black,
@@ -242,7 +300,7 @@ class _Calendario extends State<Calendario>{
       color: Colors.white,
       margin: EdgeInsets.only(top: 2*SizeConfig.heightMultiplier),
       child: TableCalendar(
-        locale: "es_EC",
+        locale: _lan=='es'?"es_EC":"en_US",
         initialCalendarFormat: CalendarFormat.month,
         daysOfWeekStyle: DaysOfWeekStyle(
           decoration: BoxDecoration(color: HexColor("e5e5e4")),

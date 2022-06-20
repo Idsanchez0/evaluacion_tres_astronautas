@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:evaluacion_tres_astronautas/SizeConfig/SizeConfig.dart';
 import 'package:evaluacion_tres_astronautas/Views/Components/footer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
+import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Ejercicio2 extends StatefulWidget{
   _Ejercicio2 createState()=>new _Ejercicio2();
@@ -14,19 +17,22 @@ class _Ejercicio2 extends State<Ejercicio2>{
   var _gifs;
   var _tabs;
   bool _isLoading=false;
+  var _lan;
 
-  @override
-  void initState() {
-    super.initState();
-    Replace();
-  }
-  //
-  Replace(){
+  getData() async {
+    SharedPreferences lanpref = await SharedPreferences.getInstance();
     setState(() {
+      _lan = lanpref.getString('idioma');
       footerG=FooterGeneral(screen: 'ejercicio2');
       _tabs='restaurant';
     });
     GetGifs(_tabs.toString());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
   }
   //
   GetGifs(String tab)async{
@@ -43,9 +49,9 @@ class _Ejercicio2 extends State<Ejercicio2>{
       });
     }else{
       print('Erro lista profesionales');
+      ErrorPopUp(_lan=='es'?"Por favor intentalo más tarde":'Please try again later');
     }
   }
-
   //PopUpError
   Future ErrorPopUp(String text){
     return showDialog(
@@ -125,7 +131,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                     borderRadius: BorderRadius.all(Radius.circular(50*SizeConfig.widthMultiplier))
                                 ),
                                 child: Center(
-                                  child: Text("Accept",
+                                  child: Text(_lan=='es'?"Aceptar":"Accept",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: "Poppins",
@@ -181,10 +187,9 @@ class _Ejercicio2 extends State<Ejercicio2>{
                         onTap: (){
                           Navigator.pop(context,false);
                         },
-                        child: Text("Close",
+                        child: Text(_lan=='es'?"Cerrar":"Close",
                           style: TextStyle(
                             fontSize: 3.5*SizeConfig.textMultiplier,
-                            fontFamily: "CaviarNormal",
                             color: Colors.white,
                             decoration: TextDecoration.underline,
                           ),
@@ -197,6 +202,55 @@ class _Ejercicio2 extends State<Ejercicio2>{
           ),
         );
       },
+    );
+  }
+  //Languaje
+  ActionsSheet(BuildContext context){
+    showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context){
+          return CupertinoActionSheet(
+            title: Text(_lan.toString()=='es'?'Idioma':'Language'),
+            actions:<CupertinoActionSheetAction> [
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: ()async{
+                  SharedPreferences idiomapref= await SharedPreferences.getInstance();
+                  idiomapref.setString('idioma', 'en');
+                  setState(() {
+                    Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: Ejercicio2()));
+                  });
+                },
+                child: Container(
+                  child: Text(_lan.toString()=='es'?'Inglés':'English'),
+                ),
+
+              ),
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: ()async{
+                  SharedPreferences idiomapref= await SharedPreferences.getInstance();
+                  idiomapref.setString('idioma', 'es');
+                  setState(() {
+                    Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: Ejercicio2()));
+                  });
+                },
+                child: Container(
+                  child: Text(_lan.toString()=='es'?'Español':'Spanish'),
+                ),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                child: Text(_lan.toString()=='es'?'Cancelar':'Cancel'),
+              ),
+            ),
+          );
+        }
     );
   }
   @override
@@ -232,7 +286,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                   margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
                                   child: InkWell(
                                     onTap: (){
-                                      ErrorPopUp('Notifications are not enabled');
+                                      ErrorPopUp(_lan=='es'?"Las notificaciones no están activadas":'Notifications are not enabled');
                                     },
                                     child: Container(
                                         padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
@@ -252,7 +306,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                   margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
                                   child: InkWell(
                                     onTap: (){
-                                      ErrorPopUp('The settings are not available');
+                                      ActionsSheet(this.context);
                                     },
                                     child: Container(
                                       padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
@@ -296,7 +350,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                   children: [
                     Container(
                       margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-                      child: Text("Favorites",
+                      child: Text(_lan=='es'?"Favoritos":"Favorites",
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 3.5*SizeConfig.textMultiplier,
@@ -327,7 +381,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                   margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
                                   child: InkWell(
                                     onTap: (){
-                                      ErrorPopUp('You cannot add more items to the list');
+                                      ErrorPopUp(_lan=='es'?"No se puede agregar más elementos a la lista":'You cannot add more items to the list');
                                     },
                                     child: Container(
                                       padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
@@ -388,7 +442,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                     boxShadow: kElevationToShadow[2],
                                   ),
                                   child: Center(
-                                    child: Text('All',
+                                    child: Text(_lan=='es'?"Todos":'All',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _tabs=='restaurant'?Colors.white:Colors.black,
@@ -419,7 +473,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                     boxShadow: kElevationToShadow[2],
                                   ),
                                   child: Center(
-                                    child: Text('Happy Hours',
+                                    child: Text(_lan=='es'?"Hora Feliz":'Happy Hours',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _tabs=='happy hours'?Colors.white:Colors.black,
@@ -450,7 +504,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                     boxShadow: kElevationToShadow[2],
                                   ),
                                   child: Center(
-                                    child: Text('Drinks',
+                                    child: Text(_lan=='es'?"Bebidas":'Drinks',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _tabs=='drinks'?Colors.white:Colors.black,
@@ -480,7 +534,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                                     boxShadow: kElevationToShadow[2],
                                   ),
                                   child: Center(
-                                    child: Text('Beer',
+                                    child: Text(_lan=='es'?"Cerveza":'Beer',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _tabs=='beer'?Colors.white:Colors.black,
@@ -527,7 +581,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                       if(_tabs=='restaurant')
                         Container(
                           margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-                          child: Text("All",
+                          child: Text(_lan=='es'?"Todos":"All",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 3.5*SizeConfig.textMultiplier,
@@ -538,7 +592,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                       else if(_tabs=='happy hours')
                         Container(
                           margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-                          child: Text("Happy Hours",
+                          child: Text(_lan=='es'?"Hora Feliz":"Happy Hours",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 3.5*SizeConfig.textMultiplier,
@@ -549,7 +603,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                       else if(_tabs=='drinks')
                           Container(
                             margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-                            child: Text("Drinks",
+                            child: Text(_lan=='es'?"Bebidas":"Drinks",
                               style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 3.5*SizeConfig.textMultiplier,
@@ -560,7 +614,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
                       else if(_tabs=='beer')
                             Container(
                               margin: EdgeInsets.only(top: 3.5*SizeConfig.heightMultiplier),
-                              child: Text("Beer",
+                              child: Text(_lan=='es'?"Cerveza":"Beer",
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 3.5*SizeConfig.textMultiplier,
