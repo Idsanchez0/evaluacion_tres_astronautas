@@ -46,7 +46,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
     }
   }
 
-  //
+  //PopUpError
   Future ErrorPopUp(String text){
     return showDialog(
       context: this.context,
@@ -149,7 +149,7 @@ class _Ejercicio2 extends State<Ejercicio2>{
       },
     );
   }
-  //
+  //PopUpFoto
   Future FotoPop(String name){
     return showDialog(
       context: context,
