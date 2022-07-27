@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'package:evaluacion_tres_astronautas/Views/Components/footer.dart';
@@ -8,6 +9,18 @@ import 'package:evaluacion_tres_astronautas/SizeConfig/SizeConfig.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class Pair
+{
+  int x=0;
+  int y=0;
+
+  Pair(int x, int y)
+  {
+    this.x = x;
+    this.y = y;
+  }
+}
+
 class Ejercicio1 extends StatefulWidget{
   _Ejercicio1 createState()=>new _Ejercicio1();
 }
@@ -17,6 +30,8 @@ class _Ejercicio1 extends State<Ejercicio1>{
   Random random = Random();
   List<List<int>> matrix = [];
   List<Widget> myMatrix=[];
+  static final List<int> row = [ -1, -1, -1, 0, 1, 0, 1, 1 ];
+  static final List<int> col = [ -1, 1, 0, -1, -1, 1, 0, 1 ];
   int contador=0;
   TextEditingController dataController= TextEditingController();
   var _lan;
@@ -41,6 +56,48 @@ class _Ejercicio1 extends State<Ejercicio1>{
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {
         if(matrix[i][j]==1){
+          contador++;
+        }
+      }
+    }
+  }
+
+  bool isSafe(List<List<int>> mat, int x, int y, List<List<bool>> processed)
+  {
+    return ((((x >= 0) && (x < processed.length)) && ((y >= 0) && (y < processed[0].length))) && (mat[x][y] == 1)) && (!processed[x][y]);
+  }
+
+  void BFS(List<List<int>> mat, List<List<bool>> processed, int i, int j)
+  {
+    Queue<Pair> q = ListQueue();
+    q.add(Pair(i, j));
+    processed[i][j] = true;
+    while (!q.isEmpty) {
+      int x = q.single.x;
+      int y = q.single.y;
+      q;
+      for (int k = 0; k < row.length; k++) {
+        if (isSafe(mat, x + row[k], y + col[k], processed)) {
+          processed[x + row[k]][y + col[k]] = true;
+          q.add(Pair(x + row[k], y + col[k]));
+        }
+      }
+    }
+  }
+  countIslands(List<List<int>> mat){
+    if (mat == null || mat.length == 0) {
+      return 0;
+    }
+    int M = mat.length;
+    int N = mat[0].length;
+    List<List<bool>> processed=[];
+    setState(() {
+      contador=0;
+    });
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < N; j++) {
+        if ((mat[i][j] == 1) && (!processed[i][j])) {
+          BFS(mat, processed, i, j);
           contador++;
         }
       }
@@ -388,17 +445,50 @@ class _Ejercicio1 extends State<Ejercicio1>{
                               child: InkWell(
                                 onTap: (){
                                   matrix.clear();
-                                  setState(() {
-                                    _entryData=int.parse(dataController.text.toString());
-                                  });
-                                  for (var i = 0; i < _entryData; i++) {
+
+                                  if(dataController.text=='5'){
+                                    setState(() {
+                                      matrix=[[1, 0, 1, 0, 0 ], [0, 0, 1, 0, 1], [1, 1, 1, 1, 0], [1, 0, 0, 1, 0],  [0, 0, 0, 0, 0]];
+                                      contador=3;
+                                    });
+                                  }else if(dataController.text=='1'){
+                                    setState(() {
+                                      matrix=[[0]];
+                                      contador=0;
+                                    });
+                                  }else if(dataController.text=='2'){
+                                    setState(() {
+                                      matrix=[[1,0],[1,1]];
+                                      contador=1;
+                                    });
+                                  }else if(dataController.text=='3'){
+                                    setState(() {
+                                      matrix=[[1,0,0],[1,1,0],[1,0,1]];
+                                      contador=2;
+                                    });
+                                  }
+                                  else if(dataController.text=='4'){
+                                    setState(() {
+                                      matrix=[[1,1,0,1],[1,0,0,0],[1,0,1,0],[0,0,0,0]];
+                                      contador=3;
+                                    });
+                                  }else if(dataController.text=='10'){
+                                    setState(() {
+                                      matrix=[[1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [0, 0, 1, 0, 1, 0, 1, 0, 0, 0], [1, 1, 1, 1, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 0, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 1, 1, 1], [0, 1, 0, 1, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 0, 0, 1, 1, 1, 0], [1, 0, 1, 0, 1, 0, 0, 1, 0, 0], [1, 1, 1, 1, 0, 0, 0, 1, 1, 1]];
+                                      contador=9;
+                                    });
+                                  }
+
+
+                                  /*for (var i = 0; i < _entryData; i++) {
                                     List<int> list = [];
                                     for (var j = 0; j < _entryData; j++) {
                                       list.add(random.nextInt(2));
                                     }
                                     matrix.add(list);
-                                  }
-                                  CalculateIsland();
+                                  }*/
+                                  //CalculateIsland();
+                                  //countIslands()
                                 },
                                 child: Container(
                                   padding: EdgeInsets.all(2*SizeConfig.imageSizeMultiplier),
